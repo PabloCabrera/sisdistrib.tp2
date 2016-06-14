@@ -1,0 +1,7 @@
+package ejercicio2y3;
+
+import java.io.Serializable;
+
+public enum Operacion implements Serializable {
+	Deposito,Extraccion,Consulta,Error,Fin;
+}
