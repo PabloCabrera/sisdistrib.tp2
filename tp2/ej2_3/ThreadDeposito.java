@@ -22,7 +22,6 @@ public class ThreadDeposito implements Runnable {
 			System.out.println("Error: ");
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override

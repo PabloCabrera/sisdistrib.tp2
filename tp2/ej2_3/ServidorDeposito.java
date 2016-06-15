@@ -13,6 +13,7 @@ public class ServidorDeposito implements Runnable {
 	protected ServerSocket serversocket;
 	protected ArrayList<Runnable> ThreadsDepositos;
 	protected String nombre="Servidor Deposito";
+	protected String pathArchivo= "Cuentas.txt";
 	
 	protected boolean esperarConexiones;
 	
@@ -37,9 +38,17 @@ public class ServidorDeposito implements Runnable {
 		this.ThreadsDepositos = new ArrayList<Runnable>();
 		this.serversocket = new ServerSocket(this.puerto);
 		this.serversocket.setSoTimeout(1000);
-		
+		chequearArchivo();
 	}
 	
+	private void chequearArchivo() {
+		//metodo que busca si existe el archivo, si existe no hace nada, sino lo crea e inicializa
+		if(!ManejadorArchivo.chequearExistencia(pathArchivo) ){
+			ManejadorArchivo.crearArchivo(pathArchivo);
+			ManejadorArchivo.inicializarArchivo(pathArchivo);
+		}
+	}
+
 	protected boolean levantarServicio(){
 		System.out.println(this.nombre+": LEVANTANDO SERVICIO");
 		while(this.esperarConexiones){
@@ -54,6 +63,7 @@ public class ServidorDeposito implements Runnable {
 				e.printStackTrace();
 				System.out.println("FIN DEL SERVIDOR! ");
 				this.esperarConexiones=false;
+				return false;
 			}
 		}
 		return true;
