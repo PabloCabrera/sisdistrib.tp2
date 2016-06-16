@@ -2,6 +2,9 @@ package ejercicio2y3;
 
 import static org.junit.Assert.*;
 
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,4 +53,42 @@ public class TestArchivo {
 		assertNull(mb);
 	}
 	
+	@Test	//verifico que se inicialize el archivo
+	public void testBuscarDirectoID() {
+		assertTrue( ManejadorArchivo.crearArchivo(path) );
+		assertTrue( ManejadorArchivo.iniciarArchivoDirecto(path) );
+		MensajeBanco mb=ManejadorArchivo.buscarDirectoPorID(2, path);
+		assertEquals((Integer)2,mb.getId());
+		assertEquals((Integer)20,mb.getMonto());
+		mb=ManejadorArchivo.buscarDirectoPorID(1, path);
+		assertEquals((Integer)1,mb.getId());
+		assertEquals((Integer)10,mb.getMonto());
+		mb=ManejadorArchivo.buscarDirectoPorID(9, path);
+		assertEquals((Integer)9,mb.getId());
+		assertEquals((Integer)90,mb.getMonto());
+		mb=ManejadorArchivo.buscarDirectoPorID(11, path);
+		assertNull(mb);
+	}
+	
+	@Test	//verifico que se modifica bien el archivo
+	public void testModificarDirectoID() {
+		assertTrue( ManejadorArchivo.crearArchivo(path) );
+		assertTrue( ManejadorArchivo.iniciarArchivoDirecto(path) );
+		MensajeBanco mb=ManejadorArchivo.buscarDirectoPorID(2, path);
+		assertEquals((Integer)2,mb.getId());
+		assertEquals((Integer)20,mb.getMonto());
+		assertTrue( ManejadorArchivo.escribirEnID(2, 30, path) );
+		mb=ManejadorArchivo.buscarDirectoPorID(2, path);
+		assertEquals((Integer)2,mb.getId());
+		assertEquals((Integer)30,mb.getMonto());
+
+	}
+	
+	@Test	//verifico que funcione el lock sobre el archivo
+	public void testLockArchivo() {
+		assertTrue( ManejadorArchivo.crearArchivo(path) );
+		assertTrue( ManejadorArchivo.inicializarArchivo(path) );
+		ManejadorArchivo.lockFile();
+		
+	}
 }

@@ -45,7 +45,7 @@ public class ServidorDeposito implements Runnable {
 		//metodo que busca si existe el archivo, si existe no hace nada, sino lo crea e inicializa
 		if(!ManejadorArchivo.chequearExistencia(pathArchivo) ){
 			ManejadorArchivo.crearArchivo(pathArchivo);
-			ManejadorArchivo.inicializarArchivo(pathArchivo);
+			ManejadorArchivo.iniciarArchivoDirecto(pathArchivo);
 		}
 	}
 

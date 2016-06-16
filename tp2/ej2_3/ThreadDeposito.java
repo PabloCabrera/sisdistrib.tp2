@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.concurrent.Semaphore;
 
 public class ThreadDeposito implements Runnable {
 	
@@ -12,6 +13,8 @@ public class ThreadDeposito implements Runnable {
 	protected ObjectInputStream inStrm;
 	
 	protected boolean conectado;
+	protected Semaphore semaforoArchivo;
+	
 	
 	public ThreadDeposito(Socket so) {
 		this.s=so;
