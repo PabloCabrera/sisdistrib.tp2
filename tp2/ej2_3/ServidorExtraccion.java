@@ -1,4 +1,4 @@
-package ejercicio2y3;
+package ej2_3;
 
 import java.io.IOException;
 import java.net.Socket;

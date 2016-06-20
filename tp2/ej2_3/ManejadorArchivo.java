@@ -1,11 +1,11 @@
-package ejercicio2y3;
+package ej2_3;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -27,6 +27,10 @@ public class ManejadorArchivo {
 	public static boolean crearArchivo(String path){
 		File archivo = new File(path);
 		try {
+			File parent = archivo.getParentFile();
+			if(!parent.exists()) {
+				parent.mkdirs();
+			}
 			archivo.createNewFile();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -37,14 +41,16 @@ public class ManejadorArchivo {
 	
 	public static boolean inicializarArchivo(String path){
 		File archivo = new File(path);
-	    BufferedWriter bw;
 	    try {
-	    	bw = new BufferedWriter(new FileWriter(archivo));
+	    	FileOutputStream fo = new FileOutputStream(archivo);
+	    	ByteBuffer bb = ByteBuffer.allocate(4);
 	    	for(int i=0;i<=10;i++){
-	    		bw.write(i);
-	    		bw.write(i*100);
+	    		bb.putInt(0, i);
+	    		fo.write(bb.array());
+	    		bb.putInt(0, i*100);
+	    		fo.write(bb.array());
 	    	}
-	    	bw.close();
+	    	fo.close();
 	    } catch (IOException e) {
 	    	e.printStackTrace();
 		} 
@@ -57,10 +63,20 @@ public class ManejadorArchivo {
 	    boolean encontrado=false;
 	    int index=0;
 	    try {
-	    	FileReader fr= new FileReader(archivo);
+	    	FileInputStream fr= new FileInputStream(archivo);
+	    	ByteBuffer bb;
+	    	byte[] b_id = new byte[4];
+	    	byte[] b_monto = new byte[4];
 	    	while(!encontrado && index<10){
-	    		int id_leido=fr.read();
-	    		int monto=fr.read();
+	    		bb =ByteBuffer.allocate(4);
+	    		fr.read(b_id, 0, 4);
+	    		bb.put(b_id);
+	    		int id_leido = bb.getInt(0);
+	    		
+	    		bb = ByteBuffer.allocate(4);
+	    		fr.read(b_monto, 0, 4);
+	    		bb.put(b_monto);
+	    		int monto = bb.getInt(0);
 	    		if(id==id_leido){
 	    			encontrado=true;
 	    			mensaje=new MensajeBanco();
@@ -85,11 +101,22 @@ public class ManejadorArchivo {
 	    try {
 	    	System.out.println("Mostrar Archivo -------------");
 	    	System.out.println();
-	    	FileReader fr= new FileReader(archivo);
+	    	FileInputStream fr= new FileInputStream(archivo);
+	    	
+	    	ByteBuffer bb;
+	    	byte[] b_id = new byte[4];
+	    	byte[] b_monto = new byte[4];
 	    	while(!encontrado && index<10){
-	    		int id_leido=fr.read();
+	    		bb = ByteBuffer.allocate(4);
+	    		fr.read(b_id, 0, 4);
+	    		bb.put(b_id);
+	    		int id_leido = bb.getInt(0);
 	    		System.out.println(" id: "+id_leido);
-	    		int monto=fr.read();
+	    		fr.read(b_monto, 0, 4);
+	    		
+	    		bb = ByteBuffer.allocate(4);
+	    		bb.put(b_monto);
+	    		int monto = bb.getInt(0);
 	    		System.out.println(" monto: "+monto);
 	    		index++;
 	    	}
