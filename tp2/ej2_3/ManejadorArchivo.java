@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
@@ -74,6 +75,30 @@ public class ManejadorArchivo {
 	    	e.printStackTrace();
 		} 
 		return mensaje;
+	}
+	
+	public static void mostrarArchivo(String path){
+		MensajeBanco mensaje=null;
+		File archivo = new File(path);
+	    boolean encontrado=false;
+	    int index=0;
+	    try {
+	    	System.out.println("Mostrar Archivo -------------");
+	    	System.out.println();
+	    	FileReader fr= new FileReader(archivo);
+	    	while(!encontrado && index<10){
+	    		int id_leido=fr.read();
+	    		System.out.println(" id: "+id_leido);
+	    		int monto=fr.read();
+	    		System.out.println(" monto: "+monto);
+	    		index++;
+	    	}
+	    	System.out.println();
+	    	System.out.println("Fin mostrar Archivo --------------------");
+	    	fr.close();
+	    } catch (IOException e) {
+	    	e.printStackTrace();
+		} 
 	}
 
 	public static boolean eliminarArchivo(String path) {
@@ -153,16 +178,91 @@ public class ManejadorArchivo {
 		return true;
 	}
 	
-	public static boolean lockFile() {
-		File sharedLockFile = new File("lockfile.lock");
+	public static boolean escribirMontoThreadSafe(Integer id, Integer monto,String path, Integer tiempoDeEspera){
+		File sharedLockFile = new File(path);
+		FileChannel channel;
+		RandomAccessFile directo;
+		ByteBuffer buf = ByteBuffer.allocate(4);
+		try {
+			directo = new RandomAccessFile(sharedLockFile, "rw");
+			directo.seek(id*4*2);
+			System.out.println("antes de hacer lock");
+			System.out.println("id en el archivo: "+directo.readInt());
+			System.out.println("monto en el archivo: "+directo.readInt());
+			System.out.println("hice el lock -----------------");
+			channel = directo.getChannel();
+		} catch (IOException e1) {
+			System.out.println("no se encontro el archivo");
+			return false;
+		}
+		FileLock lock=null;
+		
+		   // Try to get the lock
+		 /*
+		   while(null== lock ){	//mientras no tenga el lock sobre el archivo
+			   try {
+				lock = channel.tryLock();
+			} catch (IOException e) {
+				//no hago nada
+			}
+		   }//fin while
+		   */
+		try {
+			//llamada bloqueante, si esta ocupado, espera a q se desocupe
+			lock = channel.lock();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
+		   //si llege hasta aca es que tengo el lock
+		   //ahora escribo lo q tengo q escribir
+		   try {
+			System.out.println("escribirMontoThreadSafe: esperando "+tiempoDeEspera+" ms");
+			Thread.sleep(tiempoDeEspera);
+			System.out.println("me desperte, ahora escribo los datos");
+			/*
+			channel.position(id*4*2); //id * 4bytes de Integer * 2 integers cada "registro"
+			System.out.println("id en el archivo: "+channel.read(buf));
+			System.out.println("monto en el archivo: "+channel.read(buf));
+			
+			buf.putInt(monto);
+			channel.force(true);
+			channel.position(id*Integer.BYTES*2);
+			channel.write(buf);
+			
+			
+			System.out.println("id en el archivo despues modificacion: "+channel.read(buf));
+			System.out.println("monto en el archivo despues modificacion: "+channel.read(buf));
+			*/
+			
+			directo.seek(id*4*2);
+			System.out.println("id en el archivo: "+directo.readInt());
+			System.out.println("monto en el archivo: "+directo.readInt());
+			
+			directo.seek(id*4*2);
+			directo.skipBytes(4);	//me salteo los 4 bytes del id
+			directo.writeInt(monto);
+			
+			directo.seek(id*4*2);
+			System.out.println("id en el archivo despues de modificar: "+directo.readInt());
+			System.out.println("monto en el archivo despues de modificar: "+directo.readInt());
+			
+			//libero archivo y recursos
+			lock.release();
+			channel.close();
+			directo.close();
+			} catch (IOException | InterruptedException e) {
+				try {	lock.release();	} catch (IOException e1) {	}
+				e.printStackTrace();
+				return false;
+			}
+		   return true;
+	}
+	
+	public static boolean lockFile(String path) {
+		File sharedLockFile = new File(path);
 		FileChannel channel;
 		FileLock lock;
 		try{
-		   // Check if the lock exist
-		   if (sharedLockFile.exists()){
-			   	// if exist try to delete it
-			   	sharedLockFile.delete();
-		   }
 		   // Try to get the lock
 		   channel = new RandomAccessFile(sharedLockFile, "rw").getChannel();
 		   lock = channel.tryLock();

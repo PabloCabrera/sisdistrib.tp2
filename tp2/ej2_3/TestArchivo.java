@@ -10,11 +10,15 @@ import org.junit.Test;
 
 public class TestArchivo {
 	
-	String path = "Cuentas.txt";
+	String path = "cuentas/Cuentas.txt";
 	
 	@Before
 	public void setUp() throws Exception {
-		ManejadorArchivo.eliminarArchivo(path);
+		if( ManejadorArchivo.eliminarArchivo(path)){
+			System.out.println("borre el archivo");
+		}else{
+			System.out.println("Error: no pude borrar el archivo");
+		}
 	}
 	
 	@Test	//creo archivo
@@ -37,6 +41,7 @@ public class TestArchivo {
 	public void testInicializarArchivo() {
 		assertTrue( ManejadorArchivo.crearArchivo(path) );
 		assertTrue( ManejadorArchivo.inicializarArchivo(path) );
+		ManejadorArchivo.mostrarArchivo(path);
 	}
 	
 	@Test	//verifico que se inicialize el archivo
@@ -51,6 +56,7 @@ public class TestArchivo {
 		assertEquals((Integer)9,mb.getId());
 		mb=ManejadorArchivo.buscarPorId(11, path);
 		assertNull(mb);
+		ManejadorArchivo.mostrarArchivo(path);
 	}
 	
 	@Test	//verifico que se inicialize el archivo
@@ -68,6 +74,7 @@ public class TestArchivo {
 		assertEquals((Integer)90,mb.getMonto());
 		mb=ManejadorArchivo.buscarDirectoPorID(11, path);
 		assertNull(mb);
+		ManejadorArchivo.mostrarArchivo(path);
 	}
 	
 	@Test	//verifico que se modifica bien el archivo
@@ -84,11 +91,18 @@ public class TestArchivo {
 
 	}
 	
+	
 	@Test	//verifico que funcione el lock sobre el archivo
 	public void testLockArchivo() {
+		
 		assertTrue( ManejadorArchivo.crearArchivo(path) );
 		assertTrue( ManejadorArchivo.inicializarArchivo(path) );
-		ManejadorArchivo.lockFile();
-		
+		ManejadorArchivo.mostrarArchivo(path);
+		ManejadorArchivo.escribirMontoThreadSafe(1, 40, path, 2000);
+		MensajeBanco mb=ManejadorArchivo.buscarDirectoPorID(1, path);
+		assertEquals((Integer)1,mb.getId());
+		assertEquals((Integer)40,mb.getMonto());
+		ManejadorArchivo.mostrarArchivo(path);
 	}
+	
 }
