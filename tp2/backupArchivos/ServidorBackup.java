@@ -16,12 +16,13 @@ public class ServidorBackup implements Runnable {
 	protected Socket so;
 	protected Integer puerto;
 	
-	protected String carpeta="cuentas";	//carpeta en donde se guardan los archivos que recibo
+	protected String carpeta;	//carpeta en donde se guardan los archivos que recibo
 	protected boolean funcionando=false;
 	protected Integer tiempoEspera=3000;
+	protected String prefijo="backup-";	//prefijo para el nombre del nuevo archivo, si queda con el mismo nombre se hace un loop
 	
 	public static void main(String[] args) {
-		ServidorBackup s= new ServidorBackup(4444,"cuentas");
+		ServidorBackup s= new ServidorBackup(4444,"backup");
 		Thread t= new Thread(s);
 		t.start();
 	}
@@ -78,17 +79,16 @@ public class ServidorBackup implements Runnable {
 			count = bb.getInt();
 			bytes = new byte[count];						//creo el arreglo con esa cantidad de bytes
 			in.read(bytes);									//leo esa cantidad de bytes
-			System.out.println("el nombre del archivo en bytes es: "+bytes);
-			bb = ByteBuffer.wrap(bytes);
-			nombreArchivo = bb.asCharBuffer().toString();					//la paso a String y es el nombre del archivo que voy a recibir
-			System.out.println("el nombre del archivo es: "+nombreArchivo);
+			//System.out.println("el nombre del archivo en bytes es: "+bytes);
+			nombreArchivo = new String (bytes); //la paso a String y es el nombre del archivo que voy a recibir
+			//System.out.println("el nombre del archivo es: "+nombreArchivo);
 		} catch (IOException e1) {
 			System.out.println("no pude recibir el tamaño o nombre del archivo");
 			e1.printStackTrace();
 			return false;
 		}
-					
-		File archivo= new File(carpeta+"/"+nombreArchivo);	//chequeo si existe el archivo, sino lo creo
+		nombreArchivo = carpeta+"/"+this.prefijo+nombreArchivo;
+		File archivo= new File(nombreArchivo);	//chequeo si existe el archivo, sino lo creo
 		if(!archivo.exists()){
 			try {
 				archivo.createNewFile();
@@ -100,17 +100,13 @@ public class ServidorBackup implements Runnable {
 		}
 		
         try {
-            out = new FileOutputStream(carpeta+"/"+nombreArchivo);	//pongo el archivo como destino
+            out = new FileOutputStream(nombreArchivo);	//pongo el archivo como destino
         } catch (FileNotFoundException ex) {
             System.out.println("File not found. ");
             return false;
         }
 		
         bytes = new byte[16*1024];				//redimensiono el arreglo a un tamaño alto
-        
-        //parte que lee lo que llega y lo guarda al archivo. anda bien con :
-        //byte[] bytes = new byte[16*1024];
-        //        int count;
         try {
 			while ((count = in.read(bytes)) > 0) {		//leo bytes del Stream del socket, se guardan en la variable bytes
 			    out.write(bytes, 0, count);				//guardo esos bytes en el archivo
@@ -118,6 +114,7 @@ public class ServidorBackup implements Runnable {
 			out.close();								//cierro todo
 	        in.close();
 	        so.close();
+	        System.out.println("hice backup en el archivo: "+nombreArchivo);
 		} catch (IOException e) {
 			System.out.println("no pude leer del socket y escribir en el archivo: ");
 			e.printStackTrace();

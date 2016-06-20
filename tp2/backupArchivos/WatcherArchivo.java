@@ -159,14 +159,12 @@ public class WatcherArchivo implements Runnable {
 			//le envio el nombre del archivo
 			bytes = nombreArchivo.getBytes();
 			System.out.println("le envio el nombre de archivo: "+nombreArchivo);
-			System.out.println("en bytes es: "+bytes);
 		    this.outStream.write(bytes, 0, bytes.length);
 		} catch (IOException e1) {
 			System.out.println("no pude enviar el tamaño o nombre del archivo: ");
 			e1.printStackTrace();
 			return false;
-		}
-       
+		}  
         
         int count;
         try {
