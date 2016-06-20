@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
@@ -43,7 +44,7 @@ public class WatcherArchivo implements Runnable {
 	public static void main(String[] args) {
     	//para probar el ejercisio2y3
     	String[] archivos= {"Cuentas.txt"};
-    	WatcherArchivo wa= new WatcherArchivo("cuentas",archivos,"localhost",10000);
+    	WatcherArchivo wa= new WatcherArchivo("cuentas",archivos,"localhost",4444);
     	Thread hilo = new Thread(wa);
     	hilo.start();
     }
@@ -141,7 +142,6 @@ public class WatcherArchivo implements Runnable {
     
     protected boolean enviarArchivo(String nombreArchivo){
     	File archivo = new File(carpeta+"/"+nombreArchivo);
-    	long length = archivo.length();
         byte[] bytes = new byte[16 * 1024];
         InputStream in=null;
         try {
@@ -151,6 +151,23 @@ public class WatcherArchivo implements Runnable {
 			e.printStackTrace();
 			return false;
 		}
+        //aca le envio un Integer con el tamaño del nombre del archivo (cantidad de caracteres *2)
+        Integer tamañoNombreArchivo = nombreArchivo.getBytes().length;
+        bytes = ByteBuffer.allocate(4).putInt(tamañoNombreArchivo).array();
+        try {
+			this.outStream.write(bytes, 0, Integer.BYTES);
+			//le envio el nombre del archivo
+			bytes = nombreArchivo.getBytes();
+			System.out.println("le envio el nombre de archivo: "+nombreArchivo);
+			System.out.println("en bytes es: "+bytes);
+		    this.outStream.write(bytes, 0, bytes.length);
+		} catch (IOException e1) {
+			System.out.println("no pude enviar el tamaño o nombre del archivo: ");
+			e1.printStackTrace();
+			return false;
+		}
+       
+        
         int count;
         try {
 			while ((count = in.read(bytes)) > 0) {
