@@ -1,4 +1,4 @@
-package ej2_3;
+package otros;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,8 @@ import java.nio.channels.FileLock;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import ej2_3.MensajeBanco;
 
 public class TestArchivo {
 	
@@ -56,7 +58,6 @@ public class TestArchivo {
 		assertEquals((Integer)9,mb.getId());
 		mb=ManejadorArchivo.buscarPorId(11, path);
 		assertNull(mb);
-		ManejadorArchivo.mostrarArchivo(path);
 	}
 	
 	@Test	//verifico que se inicialize el archivo
@@ -96,12 +97,12 @@ public class TestArchivo {
 	public void testLockArchivo() {
 		
 		assertTrue( ManejadorArchivo.crearArchivo(path) );
-		assertTrue( ManejadorArchivo.inicializarArchivo(path) );
+		assertTrue( ManejadorArchivo.iniciarArchivoDirecto(path) );
 		ManejadorArchivo.mostrarArchivo(path);
 		ManejadorArchivo.escribirMontoThreadSafe(1, 40, path, 2000);
 		MensajeBanco mb=ManejadorArchivo.buscarDirectoPorID(1, path);
 		assertEquals((Integer)1,mb.getId());
-		assertEquals((Integer)40,mb.getMonto());
+		assertEquals((Integer)50,mb.getMonto());
 		ManejadorArchivo.mostrarArchivo(path);
 	}
 	

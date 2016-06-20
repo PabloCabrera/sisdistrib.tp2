@@ -22,6 +22,7 @@ public class ServidorBackup implements Runnable {
 	protected String prefijo="backup-";	//prefijo para el nombre del nuevo archivo, si queda con el mismo nombre se hace un loop
 	
 	public static void main(String[] args) {
+		//metodo para probar nomas
 		ServidorBackup s= new ServidorBackup(4444,"backup");
 		Thread t= new Thread(s);
 		t.start();

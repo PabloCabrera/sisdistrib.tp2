@@ -27,17 +27,23 @@ public class Cliente {
 	}
 	
 	public boolean menu(){
-		Integer opcion=4;
-		while(opcion!=-1){
+		Integer opcion=-1;
+		while(opcion!=4){
 			System.out.println("Menu: ");
 			System.out.println("1- Servicio Deposito");
 			System.out.println("2- Servicio Extraccion");
 			System.out.println("3- Servicio Consulta ");
+			System.out.println("4- Salir");
 			Integer puerto=4500;
 			opcion=Integer.parseInt( scaner.nextLine() );
+			if(opcion==4){
+				return true;
+			}
 			System.out.println("Ingrese la IP del servidor ");
 			String ip= scaner.nextLine();
-			cerrarConexion();
+			if(this.socket!=null){
+				cerrarConexion();
+			}
 			switch(opcion){
 				case 1: puerto=4500;
 					break;
@@ -45,16 +51,14 @@ public class Cliente {
 					break;
 				case 3: puerto=5500;
 					break;
-				case -1: return false;
-					//break;
 				default:
 					System.out.println("ingrese un dato correcto");
 					break;
 			}
 			try {
 				socket= new Socket(ip,puerto);
-				this.inStrm=new ObjectInputStream( this.socket.getInputStream() );
 				this.outStrm=new ObjectOutputStream( this.socket.getOutputStream() );
+				this.inStrm=new ObjectInputStream( this.socket.getInputStream() );
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				return false;
@@ -87,11 +91,12 @@ public class Cliente {
 			}else{
 				System.out.println("----- MENU DE EXTRACCION  --------");
 			}
+			//pido los datos de nro de cuenta y monto a depositar/extraer
 			System.out.println();
-			System.out.println("ingrese un id negativo para salir");
-			System.out.println("ingrese el id de la cuenta ( nro entre 0 y 10 ) ");
+			System.out.println("ingrese un id negativo o mayor a 9 para salir");
+			System.out.println("ingrese el id de la cuenta ( nro entre 0 y 9 incluidos) ");
 			id=Integer.parseInt( this.scaner.nextLine() );
-			if(id<0){
+			if(id<0 || id>9){
 				return true;
 			}
 			System.out.println("ingrese el monto ");
@@ -102,21 +107,19 @@ public class Cliente {
 			}else{
 				op=Operacion.Extraccion;
 			}
+			//creo el mensaje con los datos
 			MensajeBanco mensaje = new MensajeBanco(id,monto,op);
 			MensajeBanco respuesta=null;
 			try {
+				//envio el mensaje y espero respuesta
 				this.outStrm.writeObject(mensaje);
 				respuesta =(MensajeBanco) this.inStrm.readObject();
-			} catch (IOException e) {
-				e.printStackTrace();
-				cerrarConexion();
-				return false;
-			} catch (ClassNotFoundException e) {
+			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 				cerrarConexion();
 				return false;
 			}
-			
+			//el servidor me responde un error, o me envia la informacion de la cuenta haces de hacer la operacion
 			if(respuesta.getOperacion()==Operacion.Error){
 				System.out.println("El servidor informa el error:");
 				System.out.println(respuesta.getError());
@@ -131,6 +134,7 @@ public class Cliente {
 				System.out.println("EL SERVIDOR ESTA PROCESANDO LA PETICION, POR FAVOR AGUARDE");
 				System.out.println("");
 				try {
+					//tras recibir la primer respuesta, espero una segunda q informar el nuevo saldo de la cuenta
 					respuesta =(MensajeBanco) this.inStrm.readObject();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();

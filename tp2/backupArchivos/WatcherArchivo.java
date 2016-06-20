@@ -81,16 +81,16 @@ public class WatcherArchivo implements Runnable {
 			//lo registro y dico que eventos tome
 			myDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE,
 		     		   StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-			System.out.println("esperando eventos: ");
+			System.out.println("+WatcherArchivo - esperando eventos: ");
 			this.bloqueado=true;
 			watchKey = watcher.take();	//SE BLOQUE ACA HASTA Q HAY UN EVENTO AUNQUE SEA
 			this.bloqueado=false;
 		} catch (IOException e) {
-			System.out.println("ERROR: INICIALIZAR WATCHER: ");
+			System.out.println("+WatcherArchivo - ERROR: INICIALIZAR WATCHER: ");
 			e.printStackTrace();
 			return false;
 		} catch (InterruptedException e) {
-			System.out.println("ERROR: INICIALIZAR WATCHER: ");
+			System.out.println("+WatcherArchivo - ERROR: INICIALIZAR WATCHER: ");
 			e.printStackTrace();
 			return false;
 		}
@@ -121,22 +121,22 @@ public class WatcherArchivo implements Runnable {
 						return false;
 					}
 					if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-						System.out.println("Created: " + event.context().toString());
+						System.out.println("+WatcherArchivo - Created: " + event.context().toString());
 						this.enviarArchivo(event.context().toString());
 	                }
 					if (event.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
 						//por ahora no hago nada con esto
-						System.out.println("Delete: " + event.context().toString());
+						System.out.println("+WatcherArchivo - Delete: " + event.context().toString());
 					}
 					if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-						System.out.println("Modify: " + event.context().toString());
+						System.out.println("+WatcherArchivo - Modify: " + event.context().toString());
 						this.enviarArchivo(event.context().toString());
 					}
 				}
 			}
 		}
     	this.funcionando=false;
-    	System.out.println("BAJANDO EL SERVICIO");
+    	System.out.println("+WatcherArchivo - BAJANDO EL SERVICIO");
     	return true;
     }
     
@@ -147,7 +147,7 @@ public class WatcherArchivo implements Runnable {
         try {
 			in = new FileInputStream(archivo);
 		} catch (FileNotFoundException e) {
-			System.out.println("error de archivo no encontrado en EnviarArchivo: "+this.carpeta+"/"+nombreArchivo);
+			System.out.println("+WatcherArchivo - error de archivo no encontrado en EnviarArchivo: "+this.carpeta+"/"+nombreArchivo);
 			e.printStackTrace();
 			return false;
 		}
@@ -158,10 +158,10 @@ public class WatcherArchivo implements Runnable {
 			this.outStream.write(bytes, 0, Integer.BYTES);
 			//le envio el nombre del archivo
 			bytes = nombreArchivo.getBytes();
-			System.out.println("le envio el nombre de archivo: "+nombreArchivo);
+			System.out.println("+WatcherArchivo - le envio el nombre de archivo: "+nombreArchivo);
 		    this.outStream.write(bytes, 0, bytes.length);
 		} catch (IOException e1) {
-			System.out.println("no pude enviar el tamaño o nombre del archivo: ");
+			System.out.println("+WatcherArchivo - no pude enviar el tamaño o nombre del archivo: ");
 			e1.printStackTrace();
 			return false;
 		}  
@@ -175,7 +175,7 @@ public class WatcherArchivo implements Runnable {
 	        in.close();
 	        socket.close();
 		} catch (IOException e) {
-			System.out.println("Error en EnviarArchivo: ");
+			System.out.println("+WatcherArchivo - Error en EnviarArchivo: ");
 			e.printStackTrace();
 			return false;
 		}
@@ -188,10 +188,10 @@ public class WatcherArchivo implements Runnable {
 			this.socket= new Socket(this.ipServidor,this.puertoServidor);
 			this.outStream = socket.getOutputStream();
 		} catch (UnknownHostException e) {
-			System.out.println("no pude encontrar el servidor, finalizo");
+			System.out.println("+WatcherArchivo - no pude encontrar el servidor, finalizo");
 			return true;
 		} catch (IOException e) {
-			System.out.println("error al conectarse al servidor de backup");
+			System.out.println("+WatcherArchivo - error al conectarse al servidor de backup");
 			e.printStackTrace();
 			return false;
 		}
@@ -207,7 +207,7 @@ public class WatcherArchivo implements Runnable {
 				watcher.close();
 			}
 		} catch (IOException e) {
-			System.out.println("Error al cerrar los watcher: ");
+			System.out.println("+WatcherArchivo - Error al cerrar los watcher: ");
 			e.printStackTrace();
 		}
     }
