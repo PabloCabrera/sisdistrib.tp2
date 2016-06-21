@@ -75,15 +75,23 @@ class HiloCliente extends Thread {
 
 	public void put (String filename) {
 		this.servidor.log("PUT "+filename+"\t"+ this.socket.getRemoteSocketAddress());
+		this.printer.println("OK");
 	}
 
 	public void get (String filename) {
 		this.servidor.log("GET "+filename+"\t"+ this.socket.getRemoteSocketAddress());
 		File f = new File (filename);
+		this.printer.println("FILE nombre_archivo tamanio");
 	}
 
 	public void dir () {
+		File f = new File(".");
+		String dirs = "";
+		for(String filename: f.list()){
+			dirs += filename + "\t";
+		}
 		this.servidor.log("DIR"+"\t"+ this.socket.getRemoteSocketAddress());
+		this.printer.println("MSG "+dirs);
 	}
 
 	public void del (String filename) {
@@ -96,7 +104,7 @@ class HiloCliente extends Thread {
 			this.servidor.log ("ERROR DEL " + filename+"\t"+ this.socket.getRemoteSocketAddress());
 		}
 		if (borrado) {
-			this.printer.println("DELETED "+filename);
+			this.printer.println("OK");
 		} else {
 			this.printer.println("ERROR");
 		}
