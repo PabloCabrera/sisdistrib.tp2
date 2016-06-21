@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedReader;
@@ -11,6 +12,8 @@ import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 
 class HiloCliente extends Thread {
+	static final String PREFIX="ej1_9/archivos/";
+
 	ServidorArchivos servidor;
 	Socket socket = null;
 	InputStream input = null;
@@ -46,10 +49,9 @@ class HiloCliente extends Thread {
 
 				if(linea != null) {
 
-					/* Cambiar directorio de trabajo */
 					if (linea.matches ("(?i)^put .*$")) {
 						// Subir archivo
-						this.put(linea.replaceFirst("del ", ""));
+						this.put(linea);
 					} else if (linea.matches ("(?i)^del .*$")) {
 						// Eliminar archivo
 						this.del(linea.replaceFirst("del ", ""));
@@ -79,14 +81,14 @@ class HiloCliente extends Thread {
 		this.servidor.log("CLOSED " + this.socket.getRemoteSocketAddress());
 	}
 
-	private void put (String filename) {
-		this.servidor.log("PUT "+filename+"\t"+ this.socket.getRemoteSocketAddress());
-		this.printer.println("OK");
+	private void put (String header) {
+		this.servidor.log(header+"\t"+ this.socket.getRemoteSocketAddress());
+		this.recibirArchivo(header);
 	}
 
 	private void get (String filename) {
 		this.servidor.log("GET "+filename+"\t"+ this.socket.getRemoteSocketAddress());
-		File f = new File (filename);
+		File f = new File (PREFIX + filename);
 		if (f.exists()) {
 			if(!f.isDirectory()) {
 				this.enviarArchivo(f);
@@ -99,7 +101,7 @@ class HiloCliente extends Thread {
 	}
 
 	private void dir () {
-		File f = new File(".");
+		File f = new File(PREFIX + ".");
 		String dirs = "";
 		for(String filename: f.list()){
 			dirs += filename + "\t";
@@ -112,7 +114,7 @@ class HiloCliente extends Thread {
 		this.servidor.log("DEL "+filename+"\t"+ this.socket.getRemoteSocketAddress());
 		boolean borrado = false;
 		try {
-			File f = new File (filename);
+			File f = new File (PREFIX + filename);
 			borrado = f.delete();
 		} catch (SecurityException e) {
 			this.servidor.log ("ERROR DEL " + filename+"\t"+ this.socket.getRemoteSocketAddress());
@@ -153,6 +155,36 @@ class HiloCliente extends Thread {
 			this.printer.println("ERROR");
 		}
 		
+	}
+
+	private void recibirArchivo(String header) {
+		long tamanio, leido_total, max_leer;
+		int leido_buffer;
+		String nombre;
+		FileOutputStream guardar;
+		byte[] buffer = new byte[2048];
+
+		tamanio = Long.parseLong(header.substring(4).replaceAll(" .*", ""));
+		nombre = header.substring(4).replaceFirst("[^ ]* ", "");
+		this.servidor.log("UPLOAD START "+tamanio+" "+nombre+"\t"+ this.socket.getRemoteSocketAddress());
+		try {
+			guardar = new FileOutputStream(PREFIX+nombre);
+			leido_total = 0l;
+			leido_buffer = 0;
+			while (leido_total < tamanio) {
+				max_leer = tamanio - leido_total;
+				if(max_leer >= buffer.length) {
+					max_leer = buffer.length;
+				}
+				leido_buffer = this.input.read(buffer, 0, (int)max_leer);
+				guardar.write(buffer, 0, leido_buffer);
+				leido_total += leido_buffer;
+			}
+			guardar.close();
+			this.servidor.log("UPLOAD COMPLETE "+tamanio+" "+nombre+"\t"+ this.socket.getRemoteSocketAddress());
+		} catch (Exception e) {
+			this.servidor.log("ERROR UPLOAD "+tamanio+" "+nombre+"\t"+ this.socket.getRemoteSocketAddress());
+		}
 	}
 
 	private String getLinea() {

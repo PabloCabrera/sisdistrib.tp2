@@ -2,6 +2,8 @@ package ej1_9;
 
 import java.util.Scanner;
 import java.net.Socket;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
@@ -46,11 +48,17 @@ public class Cliente {
 			try {
 				System.out.print("> ");
 				msj=s.nextLine();
-				this.printer.println(msj);
-				this.printer.flush();
-				respuesta = this.getLinea();
-				if(msj.matches("(?i)quit")){
-					continuar=false;
+				if(msj.matches("(?i)^put .*$")){
+					this.put(msj);
+					respuesta = "";
+				} else {
+					this.printer.println(msj);
+					this.printer.flush();
+					respuesta = this.getLinea();
+				
+ 					if(msj.matches("(?i)quit")){
+						continuar=false;
+					}
 				}
 				if (respuesta.startsWith("MSG ")) {
 					System.out.println(respuesta.substring(4));
@@ -95,11 +103,66 @@ public class Cliente {
 				leido_total += leido_buffer;
 			}
 			guardar.close();
-		System.out.println("TRANSFERENCIA COMPLETA <<"+nombre+">> ("+tamanio+" Bytes)");
+		System.out.println("\nTRANSFERENCIA COMPLETA <<"+nombre+">> ("+tamanio+" Bytes)");
 		} catch (Exception e) {
 			System.out.println("Se ha producido un error: "+e.getMessage());
 		}
 	}
+
+	private void put (String comando) {
+		String nombre = comando.substring(4);
+		File file = new File (nombre);
+
+		if (file.exists()){
+			if(!file.isDirectory()) {
+				try {
+					long tamanio = file.length();
+					this.printer.println("PUT "+tamanio+" "+file.getName());
+					this.enviarArchivo(file);
+				} catch (Exception e) {
+					System.out.println("Se ha producido un error: "+e.getMessage());
+				}
+			} else {
+				System.out.println("No se puede enviar el archivo "+nombre+", es un directorio.");
+			}
+		} else {
+			System.out.println("El archivo "+nombre+" no existe.");
+		}
+		
+	}
+
+	private void enviarArchivo (File file) {
+		// Esto se ejecuta despues de enviar la cabecera
+		try {
+			boolean cerrar = false;
+			int leidos = 0;
+			byte[] buffer = new byte[2048];
+			FileInputStream finput = new FileInputStream (file);
+			System.out.println("TRANSFIRIENDO ARCHIVO <<"+file.getName()+">> ("+file.length()+" Bytes)");
+
+			while (!cerrar) {
+				try {
+					leidos = finput.read(buffer, 0, 2048);
+
+					if (leidos == -1) {
+						cerrar= true;
+					} else if (leidos > 0) {
+						this.out.write(buffer, 0, leidos);
+						System.out.print("+");
+					}
+				} catch (IOException e) {
+					System.out.println("\nSe ha producido un error: "+e.getMessage());
+					cerrar = true;
+				}
+			}
+			System.out.println("\nTRANSFERENCIA COMPLETA <<"+file.getName()+">> ("+file.length()+" Bytes)");
+
+		} catch (Exception e) {
+			this.printer.println("Se ha producido un error: "+e.getMessage());
+		}
+		
+	}
+
 
 	private String getLinea() {
 		int leido=0;
@@ -134,14 +197,18 @@ public class Cliente {
 			sc = new Scanner(System.in);
 			System.out.print("Conectarse al servidor: ");
 			servidor = sc.nextLine();
+			if (servidor.length() == 0) {
+				System.out.println("Warning: No se ha especificado un servidor. Se utilizara localhost"); 
+			}
 			System.out.print("Puerto: ");
 			try {
 				puerto = Integer.parseInt(sc.nextLine());
 			} catch (Exception e) {
-				System.out.println("Error: Numero de puerto no valido");
+				System.out.println("Warning: Numero de puerto no valido. Se utilizara el puerto predeterminado 9019");
+				puerto = 9019;
 			}
 
-			if (puerto != -1) {
+			if (puerto > 0) {
 				try {
 					cl = new Cliente(servidor, puerto);
 					cl.interactivo();
