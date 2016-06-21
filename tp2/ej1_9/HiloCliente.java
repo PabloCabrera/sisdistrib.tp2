@@ -1,8 +1,9 @@
 package ej1_9;
 
 import java.net.Socket;
-import java.io.File;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedReader;
@@ -46,20 +47,25 @@ class HiloCliente extends Thread {
 				if(linea != null) {
 
 					/* Cambiar directorio de trabajo */
-					if (linea.matches ("^put .*$")) {
+					if (linea.matches ("(?i)^put .*$")) {
 						// Subir archivo
 						this.put(linea.replaceFirst("del ", ""));
-					} else if (linea.matches ("^del .*$")) {
+					} else if (linea.matches ("(?i)^del .*$")) {
 						// Eliminar archivo
 						this.del(linea.replaceFirst("del ", ""));
-					} else if (linea.matches ("^get .*$")) {
+					} else if (linea.matches ("(?i)^get .*$")) {
 						// Recuperar archivo
 						this.get(linea.replaceFirst("get ", ""));
-					} else if (linea.matches ("^dir.*$")) {
+					} else if (linea.matches ("(?i)^dir.*$")) {
 						// Mostrar listado de directorio
 						this.dir();
+					} else if (linea.matches ("(?i)^quit.*$")) {
+						// Terminar
+						this.printer.println("MSG Cerrando conexion");
+						cerrar = true;
 					} else {
 						// Mostrar cartel de comando desconocido
+						this.printer.println("MSG Comando desconocido");
 					}
 				} else {
 					cerrar = true;
@@ -73,18 +79,26 @@ class HiloCliente extends Thread {
 		this.servidor.log("CLOSED " + this.socket.getRemoteSocketAddress());
 	}
 
-	public void put (String filename) {
+	private void put (String filename) {
 		this.servidor.log("PUT "+filename+"\t"+ this.socket.getRemoteSocketAddress());
 		this.printer.println("OK");
 	}
 
-	public void get (String filename) {
+	private void get (String filename) {
 		this.servidor.log("GET "+filename+"\t"+ this.socket.getRemoteSocketAddress());
 		File f = new File (filename);
-		this.printer.println("FILE nombre_archivo tamanio");
+		if (f.exists()) {
+			if(!f.isDirectory()) {
+				this.enviarArchivo(f);
+			} else {
+				this.printer.println("MSG No se puede descargar "+filename+", es un directorio");
+			}
+		} else {
+			this.printer.println("MSG No existe el archivo "+filename);
+		}
 	}
 
-	public void dir () {
+	private void dir () {
 		File f = new File(".");
 		String dirs = "";
 		for(String filename: f.list()){
@@ -94,7 +108,7 @@ class HiloCliente extends Thread {
 		this.printer.println("MSG "+dirs);
 	}
 
-	public void del (String filename) {
+	private void del (String filename) {
 		this.servidor.log("DEL "+filename+"\t"+ this.socket.getRemoteSocketAddress());
 		boolean borrado = false;
 		try {
@@ -110,7 +124,38 @@ class HiloCliente extends Thread {
 		}
 	}
 
-	public String getLinea() {
+	private void enviarArchivo (File file) {
+		try {
+			boolean cerrar = false;
+			int leidos = 0;
+			byte[] buffer = new byte[2048];
+			FileInputStream finput = new FileInputStream (file);
+			this.printer.println("FILE "+file.length()+" "+file.getName());
+
+			while (!cerrar) {
+				try {
+					leidos = finput.read(buffer, 0, 2048);
+
+					if (leidos == -1) {
+						cerrar= true;
+					} else if (leidos == 0) {
+						this.sleep(1);
+					} else {
+						this.output.write(buffer, 0, leidos);
+					}
+				} catch (IOException e) {
+					this.servidor.log("ERROR GET " + file.getName()+"\t"+ this.socket.getRemoteSocketAddress());
+					cerrar = true;
+				}
+			}
+
+		} catch (Exception e) {
+			this.printer.println("ERROR");
+		}
+		
+	}
+
+	private String getLinea() {
 		int leido=0;
 		ByteArrayOutputStream barray = new ByteArrayOutputStream();
 		boolean continuar = true;

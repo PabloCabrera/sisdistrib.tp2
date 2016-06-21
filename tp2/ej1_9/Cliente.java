@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
 import java.io.IOException;
@@ -48,13 +49,14 @@ public class Cliente {
 				this.printer.println(msj);
 				this.printer.flush();
 				respuesta = this.getLinea();
-				if(msj.equals("quit")){
+				if(msj.matches("(?i)quit")){
 					continuar=false;
 				}
 				if (respuesta.startsWith("MSG ")) {
 					System.out.println(respuesta.substring(4));
 				} else if (respuesta.startsWith("FILE ")) {
 					System.out.println("Se recibira un archivo");
+					this.recibirArchivo(respuesta);
 				} else if (respuesta.startsWith("ERROR")) {
 					System.out.println("Se ha producido un error");
 				} else if (respuesta.startsWith("OK")) {
@@ -68,7 +70,38 @@ public class Cliente {
 		}
 	}
 
-	public String getLinea() {
+	private void recibirArchivo(String header) {
+		long tamanio, leido_total, max_leer;
+		int leido_buffer;
+		String nombre;
+		FileOutputStream guardar;
+		byte[] buffer = new byte[2048];
+
+		tamanio = Long.parseLong(header.substring(5).replaceAll(" .*", ""));
+		nombre = header.substring(5).replaceFirst("[^ ]* ", "");
+		System.out.println("TRANSFIRIENDO <<"+nombre+">> ("+tamanio+" Bytes)");
+		try {
+			guardar = new FileOutputStream(nombre);
+			leido_total = 0l;
+			leido_buffer = 0;
+			while (leido_total < tamanio) {
+				max_leer = tamanio - leido_total;
+				if(max_leer >= buffer.length) {
+					max_leer = buffer.length;
+				}
+				leido_buffer = this.in.read(buffer, 0, (int)max_leer);
+				guardar.write(buffer, 0, leido_buffer);
+				System.out.print("*");
+				leido_total += leido_buffer;
+			}
+			guardar.close();
+		System.out.println("TRANSFERENCIA COMPLETA <<"+nombre+">> ("+tamanio+" Bytes)");
+		} catch (Exception e) {
+			System.out.println("Se ha producido un error: "+e.getMessage());
+		}
+	}
+
+	private String getLinea() {
 		int leido=0;
 		ByteArrayOutputStream barray = new ByteArrayOutputStream();
 		boolean continuar = true;
