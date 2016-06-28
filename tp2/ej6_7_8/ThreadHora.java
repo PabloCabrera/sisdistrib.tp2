@@ -6,26 +6,18 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Date;
 
-public class ThreadHora implements Runnable {
+import otros.Hilo;
+
+public class ThreadHoraLocal extends Hilo {
 	
 	protected Socket s;
-	protected ServidorHora servidorHora;
 	protected ObjectOutputStream outStrm;
 	protected ObjectInputStream inStrm;
-	protected Date fechayhora;
 	
-	public ThreadHora(Socket so, ServidorHora servidorHora) {
-		this.s=so;
-		this.servidorHora=servidorHora;
-		try {
-			this.inStrm=new ObjectInputStream( this.s.getInputStream() );
-			this.outStrm=new ObjectOutputStream( this.s.getOutputStream() );
-		} catch (Exception e) {
-			System.out.println("Error: ");
-			e.printStackTrace();
-		}
+	public ThreadHoraLocal(Socket socket){
+		super(socket);
 	}
-
+	
 	@Override
 	public void run() {
 		boolean enviando=true;
@@ -36,34 +28,26 @@ public class ThreadHora implements Runnable {
 				System.out.println("ThreadHora: se desconecto el cliente");
 				enviando=false;
 			}
-			if( this.servidorHora.pedirHora() !=null){
+			if(enviando){
 				try {
-					this.outStrm.writeObject(this.fechayhora);
+					String fecha = this.conseguirHora();
+					System.out.println("envio la hora:" +fecha);
+					this.outStrm.writeObject(fecha);
 				} catch (IOException e) {
 					System.out.println("ThreadHora: no pude enviar la hora");
 					enviando=false;
-				}
-			}else{
-				System.out.println("ThreadHora: no consegui hora del master");
-				enviando=false;
-			}
-			
+				}	
+			}			
 		}
 	}
-
-	protected void cerrarConexion() {
-		try {
-			if(this.inStrm!=null){
-				this.inStrm.close();
-			}
-			if(this.outStrm!=null){
-				this.outStrm.close();
-			}
-			if(this.s!=null){
-				this.s.close();
-			}
-		} catch (IOException e) {
-			//no me interesan los errores q haya aca
-		}
+	
+	@SuppressWarnings("deprecation")
+	protected String conseguirHora(){
+		String hora=null;
+		
+		Date fechaYHora = new Date();
+		hora="Hora Local: "+ fechaYHora.getHours() +":"+fechaYHora.getMinutes()+":" +fechaYHora.getSeconds();
+		return hora;
 	}
+	
 }
