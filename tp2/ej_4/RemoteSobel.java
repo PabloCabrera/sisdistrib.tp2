@@ -2,7 +2,16 @@ package ej_4;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.awt.image.BufferedImage;
 
 public interface RemoteSobel extends Remote {
-	public Object sobel (Object image) throws RemoteException;
+	/* Estados */
+	public static final int NO_INICIADO = 0;
+	public static final int TRABAJANDO = 1;
+	public static final int COMPLETO = 2;
+	public static final int FALLO = -1;
+
+	/* Metodos */
+	public BufferedImage sobel (BufferedImage image) throws RemoteException, Exception;
+	public int getEstado () throws RemoteException;
 }
