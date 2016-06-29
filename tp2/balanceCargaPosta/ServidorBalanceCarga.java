@@ -2,7 +2,6 @@ package balanceCargaPosta;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import otros.Servidor;
 
@@ -47,11 +46,11 @@ public class ServidorBalanceCarga extends Servidor {
 
 	protected boolean levantarBuscardorServidores() {
 		try {
-			this.receptorMjsUdp = new ServicioRecepcionServidores(5555);
+			this.receptorMjsUdp = new ServicioRecepcionServidores();
 			//le paso mi lista de servidores para que le vaya agregando servidores a medida que recibe msj UDP
 			this.receptorMjsUdp.setServidores(this.servidoresDisponibles);
-			new Thread(this.receptorMjsUdp);
-		} catch (SocketException e) {
+			new Thread(this.receptorMjsUdp).start();
+		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -60,7 +59,7 @@ public class ServidorBalanceCarga extends Servidor {
 	
 	@Override
 	protected void recibiConexion(Socket so){
-		System.out.println("+ "+this.nombre+": recibi una conexion desde "+so.getInetAddress());
+		System.out.println("+ "+this.nombre+": recibi una conexion desde "+so.getInetAddress()+":"+so.getPort());
 		//busco al servidor al q menos le di
 		boolean asignado=false;
 		while(!asignado && this.servidoresDisponibles.size()>0){
@@ -71,8 +70,9 @@ public class ServidorBalanceCarga extends Servidor {
 				Thread t= new Thread( thread);
 				t.start();
 				this.threads.add(t);
+				this.servidoresDisponibles.get(subindex).incrementarNroConexionesAsignadas();
 				asignado=true;
-			}else{
+			}else{ 
 				//si ese el hilo no se pudo conectar elimino la informacion del servidor de la lista
 				thread.anular();	//anulo los datos que le di a ese hilo
 				this.servidoresDisponibles.remove(subindex);

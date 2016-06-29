@@ -5,11 +5,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class ThreadLecturaEnvio implements Runnable {
-	
+	protected Integer id;
 	protected ObjectOutputStream enviar;
 	protected ObjectInputStream leer;
 	
-	public ThreadLecturaEnvio(ObjectInputStream lectura, ObjectOutputStream escritura) {
+	public ThreadLecturaEnvio(Integer id,ObjectInputStream lectura, ObjectOutputStream escritura) {
+		this.id=id;
 		this.leer=lectura;
 		this.enviar=escritura;
 	}
@@ -22,9 +23,12 @@ public class ThreadLecturaEnvio implements Runnable {
 		while(!error){
 			try {
 				Object o=leer.readObject();
+				//System.out.println(this.id+"- paso por el balanceador: "+o);
 				enviar.writeObject(o);
 			} catch (ClassNotFoundException | IOException e) {
 				error=true;
+				System.out.println(this.id+"- se han desconectado!");
+				//e.printStackTrace();
 			}
 		}
 	}

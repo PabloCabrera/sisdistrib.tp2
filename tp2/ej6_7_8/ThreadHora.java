@@ -11,8 +11,6 @@ import otros.Hilo;
 public class ThreadHoraLocal extends Hilo {
 	
 	protected Socket s;
-	protected ObjectOutputStream outStrm;
-	protected ObjectInputStream inStrm;
 	
 	public ThreadHoraLocal(Socket socket){
 		super(socket);
@@ -31,7 +29,7 @@ public class ThreadHoraLocal extends Hilo {
 			if(enviando){
 				try {
 					String fecha = this.conseguirHora();
-					System.out.println("envio la hora:" +fecha);
+					//System.out.println("envio la hora:" +fecha);
 					this.outStrm.writeObject(fecha);
 				} catch (IOException e) {
 					System.out.println("ThreadHora: no pude enviar la hora");

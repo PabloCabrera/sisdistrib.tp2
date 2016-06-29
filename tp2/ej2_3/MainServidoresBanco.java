@@ -1,6 +1,5 @@
 package ej2_3;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 import backupArchivos.WatcherArchivo;
@@ -11,6 +10,7 @@ public class MainServidoresBanco {
 	private  ServidorExtraccion se;
 	private  WatcherArchivo backupServidor;
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		MainServidoresBanco main= new MainServidoresBanco();
 	}
@@ -45,6 +45,7 @@ public class MainServidoresBanco {
 			if(backupServidor!=null){
 				backupServidor.setFuncionando(false);
 			}
+			s.close();
 		} catch (Exception e) {
 			//si algo falla bajo todos los servidores
 			if(sd!=null){
@@ -57,6 +58,7 @@ public class MainServidoresBanco {
 				backupServidor.setFuncionando(false);
 			}
 		}
+		
 	}
 	
 }

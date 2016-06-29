@@ -54,10 +54,14 @@ public class Cliente {
 			while(true){
 				String s="dame la hora wacho!";
 				//no hay protocolo, le envio un String con cualquier cosa y recibo un String con la hora
+				long inicio = System.currentTimeMillis();
 				escribir.writeObject(s);
 				String respuesta=(String) leer.readObject();
+				long fin = System.currentTimeMillis();
 				System.out.println("el servidor me respondio:");
 				System.out.println(respuesta);
+				long diferencia = fin - inicio;
+				System.out.println("el servidor tardo: "+diferencia+"ms en responder");
 				Thread.sleep(5000);
 			}
 		} catch (IOException | InterruptedException | ClassNotFoundException e) {

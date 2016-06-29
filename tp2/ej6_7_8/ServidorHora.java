@@ -2,8 +2,10 @@ package ej6_7_8;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Date;
 
+import balanceCargaPosta.ServicioEnvioServidor;
 import otros.Servidor;
 
 public class ServidorHora extends Servidor {
@@ -13,6 +15,7 @@ public class ServidorHora extends Servidor {
 	protected boolean soyMaster;
 	protected String ipMaster;
 	protected Integer PuertoMaster;
+	protected ServicioEnvioServidor servicioBroadcast;
 	
 	public ServidorHora(boolean horalocal) throws IOException {
 		super();
@@ -35,7 +38,7 @@ public class ServidorHora extends Servidor {
 		try {
 			//solo para probar
 									//si es true uso Date, si es false uso la pagina
-			ServidorHora sd= new ServidorHora(6000,true);
+			ServidorHora sd= new ServidorHora(5000,true);
 			Thread t= new Thread(sd);
 			t.start();
 		} catch (IOException e) {
@@ -46,7 +49,12 @@ public class ServidorHora extends Servidor {
 	@Override
 	public void run(){
 		this.soyMaster= buscarMaster();		//busco a ver si soy yo master u otro
-		
+		try {	//envio un broadcast al balanceador de carga para informarle que estoy disponible para recibir conexiones
+			this.servicioBroadcast = new ServicioEnvioServidor(this.puerto);
+			this.servicioBroadcast.enviarBroadcast();
+		} catch (SocketException e) {
+			System.out.println(this.nombre+" no pude crear el servicioEnvioServidor :(");
+		}
 		this.levantarServicio();
 	}
 	

@@ -6,6 +6,12 @@ public class InfoServidor {
 	protected Integer puerto;
 	protected Integer nroConexionesAsignadas;
 	
+	public InfoServidor(String ip, Integer puertoEmisor) {
+		this.ip=ip;
+		this.puerto=puertoEmisor;
+		this.nroConexionesAsignadas=0;
+	}
+	
 	public String getIp() {
 		return ip;
 	}
@@ -30,4 +36,20 @@ public class InfoServidor {
 	public void decrementarNroConexionesAsignadas(){
 		this.nroConexionesAsignadas--;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o.getClass()!=InfoServidor.class){
+			return false;
+		}else{
+			InfoServidor is = (InfoServidor)o;
+			if(is.getIp().equals(this.getIp()) && is.getPuerto().equals(this.getPuerto())){
+				return true;
+			}else{
+				return false;
+			}
+		}
+	}
+	
+	
 }
