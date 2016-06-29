@@ -46,4 +46,10 @@ public abstract class Hilo implements Runnable {
 		}
 	}
 	
+	//metodo para que este hilo libere los recursos y el garbage colector lo elimine(en caso de que no lo inicialize)
+	public void anular(){
+		this.s=null;
+		this.inStrm=null;
+		this.outStrm=null;
+	}
 }

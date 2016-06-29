@@ -2,13 +2,16 @@ package balanceCargaPosta;
 
 import java.io.IOException;
 import java.net.Socket;
-
-import ej2_3.ThreadDeposito;
+import java.net.SocketException;
+import java.util.ArrayList;
 import otros.Servidor;
 
 public class ServidorBalanceCarga extends Servidor {
 	
 	protected Integer nrohilo=0;
+	protected ArrayList<InfoServidor> servidoresDisponibles= new ArrayList<InfoServidor>();
+	protected Integer ultimoServidorConectado=0;
+	protected ServicioRecepcionServidores receptorMjsUdp;
 	
 	public static void main(String[] args) {
 		try {
@@ -43,16 +46,58 @@ public class ServidorBalanceCarga extends Servidor {
 	}
 
 	protected boolean levantarBuscardorServidores() {
+		try {
+			this.receptorMjsUdp = new ServicioRecepcionServidores(5555);
+			//le paso mi lista de servidores para que le vaya agregando servidores a medida que recibe msj UDP
+			this.receptorMjsUdp.setServidores(this.servidoresDisponibles);
+			new Thread(this.receptorMjsUdp);
+		} catch (SocketException e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 	
 	@Override
 	protected void recibiConexion(Socket so){
 		System.out.println("+ "+this.nombre+": recibi una conexion desde "+so.getInetAddress());
-		Thread t= new Thread(new ThreadBalanceCarga(so,this.nrohilo));
-		t.start();
-		this.threads.add(t);
+		//busco al servidor al q menos le di
+		boolean asignado=false;
+		while(!asignado && this.servidoresDisponibles.size()>0){
+			int subindex= this.buscarServidorMenosConexiones();
+			ThreadBalanceCarga thread = new ThreadBalanceCarga(so,this.nrohilo,
+						this.servidoresDisponibles.get(subindex).getIp(),this.servidoresDisponibles.get(subindex).getPuerto());
+			if(thread.ConectarseAServidor()){
+				Thread t= new Thread( thread);
+				t.start();
+				this.threads.add(t);
+				asignado=true;
+			}else{
+				//si ese el hilo no se pudo conectar elimino la informacion del servidor de la lista
+				thread.anular();	//anulo los datos que le di a ese hilo
+				this.servidoresDisponibles.remove(subindex);
+			}
+		}//fin while
+		//si termino el while y no asigne el socket a ningun hilo, significa que no tengo servidores o no los pude alcanzar
+		// entonces cierro el socket al cliente y muestro msj
+		if(!asignado){
+			try { so.close();	} catch (IOException e) {}
+			System.out.println("no me pude conectar con ningun servidor, veirifique que estan funcionando");
+		}
 	}
 	
+	protected Integer buscarServidorMenosConexiones(){
+		Integer menor=this.servidoresDisponibles.get(0).getNroConexionesAsignadas();
+		Integer subindexMenor=0;
+		Integer index=0;
+		for(InfoServidor is: this.servidoresDisponibles){
+			if(is.getNroConexionesAsignadas()<menor){
+				menor=is.getNroConexionesAsignadas();
+				subindexMenor=index;
+			}
+			index++;
+		}
+		return subindexMenor;
+	}
 	
 }

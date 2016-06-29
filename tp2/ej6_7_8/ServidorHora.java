@@ -35,7 +35,7 @@ public class ServidorHora extends Servidor {
 		try {
 			//solo para probar
 									//si es true uso Date, si es false uso la pagina
-			ServidorHora sd= new ServidorHora(6000,false);
+			ServidorHora sd= new ServidorHora(6000,true);
 			Thread t= new Thread(sd);
 			t.start();
 		} catch (IOException e) {
