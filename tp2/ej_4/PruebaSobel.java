@@ -1,5 +1,6 @@
 package ej_4;
 
+import java.util.Date;
 import java.io.File;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -24,8 +25,12 @@ public class PruebaSobel extends JFrame {
 		try {
 			BufferedImage img_in = ImageIO.read (new File("ej_4/imagen_prueba.jpg"));
 			this.setImg(img_in);
+			Date antes = new Date();
 			WorkerSobel worker = new WorkerSobel();
-			BufferedImage img_out = worker.sobel(img_in);
+			Date despues = new Date();
+			System.out.println("Se ha completado el trabajo en "+ (despues.getTime() - antes.getTime()) +" milisegundos");
+			SerializableImage img_serial_out = worker.sobel(new SerializableImage(img_in));
+			BufferedImage img_out = img_serial_out.getImage();
 			this.setImg(img_out);
 		} catch (Exception e) {
 			e.printStackTrace();

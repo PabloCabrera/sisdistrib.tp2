@@ -12,6 +12,6 @@ public interface RemoteSobel extends Remote {
 	public static final int FALLO = -1;
 
 	/* Metodos */
-	public BufferedImage sobel (BufferedImage image) throws RemoteException, Exception;
+	public SerializableImage sobel (SerializableImage image) throws RemoteException, Exception;
 	public int getEstado () throws RemoteException;
 }

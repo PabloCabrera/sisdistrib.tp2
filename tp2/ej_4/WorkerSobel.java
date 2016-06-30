@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.awt.Graphics2D;
+import java.rmi.Remote; 
 import java.rmi.RemoteException; 
 import java.rmi.server.UnicastRemoteObject;
 
@@ -37,25 +38,27 @@ public class WorkerSobel extends UnicastRemoteObject implements RemoteSobel{
 	}
 
 	@Override
-	public BufferedImage sobel (BufferedImage entrada) throws RemoteException, Exception {
+	public SerializableImage sobel (SerializableImage entrada) throws RemoteException/*, Exception */{
 		if (this.estado != RemoteSobel.TRABAJANDO) {
 			synchronized (this.estado) {
 				this.estado = 1;
 			}
-			this.fuente = entrada;
-			this.fuente_gris =new BufferedImage (entrada.getWidth(), entrada.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			this.fuente = entrada.getImage();
+			this.fuente_gris =new BufferedImage (this.fuente.getWidth(), this.fuente.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			Graphics2D g2d = (Graphics2D) this.fuente_gris.getGraphics();
 			g2d.drawImage(fuente, 0, 0, null);
-			this.procesada = new BufferedImage (entrada.getWidth(), entrada.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			this.procesada = new BufferedImage (this.fuente.getWidth(), this.fuente.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 
 			this.sobel_real (this.fuente_gris, this.procesada);
 
 			synchronized (this.estado) {
 				this.estado=2;
 			}
-			return this.procesada;
+			SerializableImage salida = new SerializableImage(this.procesada);
+			return salida;
 		} else {
-			throw new Exception ("Worker ocupado");
+			// throw new Exception ("Worker ocupado");
+			return null;
 		}
 	}
 
