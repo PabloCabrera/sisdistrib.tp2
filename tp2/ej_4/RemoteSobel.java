@@ -10,6 +10,7 @@ public interface RemoteSobel extends Remote {
 	public static final int TRABAJANDO = 1;
 	public static final int COMPLETO = 2;
 	public static final int FALLO = -1;
+	public static final int DESCONECTADO = -2;
 
 	/* Metodos */
 	public SerializableImage sobel (SerializableImage image) throws RemoteException, Exception;

@@ -1,15 +1,22 @@
 package ej_4;
 
 import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
 
 public class PedazoImagen {
 	private int originalWidth, originalHeight;
 	private int offsetX, offsetY;
 	private int width, height;
 	private BufferedImage buffer;
+	private boolean procesado = false;
 
-	public PedazoImagen (int originalWidth,int originalHeight, int offsetX,int offsetY, int
-		width,int height,int imageType) {
+	public PedazoImagen 
+	(
+		int originalWidth, int originalHeight,
+		int offsetX,int offsetY,
+		int width, int height,
+		int imageType
+	) {
 		this.originalWidth = originalWidth;
 		this.originalHeight = originalHeight;
 		this.offsetX = offsetX;
@@ -17,17 +24,6 @@ public class PedazoImagen {
 		this.width = width;
 		this.height = height;
 		buffer = new BufferedImage(width, height, imageType);
-	}
-
-	public PedazoImagen(int originalWidth, int originalHeight, double offsetX, double offsetY, double width,
-			double height, int imageType) {
-		this.originalWidth = originalWidth;
-		this.originalHeight = originalHeight;
-		this.offsetX =(int) offsetX;
-		this.offsetY =(int) offsetY;
-		this.width =(int) width;
-		this.height =(int) height;
-		buffer = new BufferedImage((int)width,(int) height, imageType);
 	}
 
 	public int getOriginalWidth() {
@@ -84,5 +80,18 @@ public class PedazoImagen {
 
 	public void setBuffer(BufferedImage buffer) {
 		this.buffer = buffer;
+	}
+
+	public void setProcesado (boolean p) {
+		this.procesado = p;
+	}
+
+	public boolean getProcesado () {
+		return this.procesado;
+	}
+
+	public void pegarEn(BufferedImage lienzo) {
+		Graphics2D g2d = (Graphics2D) lienzo.getGraphics();
+		g2d.drawImage (buffer, this.offsetX, this.offsetY, null);
 	}
 }

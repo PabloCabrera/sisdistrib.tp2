@@ -38,7 +38,7 @@ public class WorkerSobel extends UnicastRemoteObject implements RemoteSobel{
 	}
 
 	@Override
-	public SerializableImage sobel (SerializableImage entrada) throws RemoteException/*, Exception */{
+	public SerializableImage sobel (SerializableImage entrada) throws RemoteException, Exception {
 		if (this.estado != RemoteSobel.TRABAJANDO) {
 			synchronized (this.estado) {
 				this.estado = 1;
@@ -57,8 +57,8 @@ public class WorkerSobel extends UnicastRemoteObject implements RemoteSobel{
 			SerializableImage salida = new SerializableImage(this.procesada);
 			return salida;
 		} else {
-			// throw new Exception ("Worker ocupado");
-			return null;
+			throw new Exception ("Worker ocupado");
+			//return null;
 		}
 	}
 

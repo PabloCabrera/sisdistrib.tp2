@@ -11,9 +11,9 @@ public class IniciarWorkers {
 
 	public static void main(String args[]) {
 		try {
-			WorkerSobel[] workers = new WorkerSobel[NUM_WORKERS];
+			RemoteSobel[] workers = new RemoteSobel[NUM_WORKERS];
 			for (int index=0; index<NUM_WORKERS; index++) {
-				workers[index] = (WorkerSobel) (new WorkerSobel());
+				workers[index] = new WorkerSobel();
 			}
 
 			// Bind the remote object's stub in the registry
