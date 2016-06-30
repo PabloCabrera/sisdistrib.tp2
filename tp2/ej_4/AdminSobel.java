@@ -29,7 +29,7 @@ import javax.swing.JFrame;
 public class AdminSobel extends JFrame{
 	protected final static int NUM_DIVISIONES = 4;
 	protected final static String HOSTLIST_FILE = "ej_4/hostlist.txt";
-	protected final static String INPUT_FILE = "ej_4/imagen_prueba.jpg";
+	protected final static String INPUT_FILE = "ej_4/imagen_prueba2.jpg";
 
 	protected BufferedImage imagen_fuente = null;
 	protected BufferedImage imagen_procesada = null;
@@ -56,7 +56,7 @@ public class AdminSobel extends JFrame{
 		this.hilos = new ArrayList<Thread>();
 		this.conectarAWorkers();
 
-		this.setSize(1000, 667);
+		this.setSize(1920, 1080);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.show();
 	}

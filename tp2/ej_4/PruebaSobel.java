@@ -19,11 +19,11 @@ public class PruebaSobel extends JFrame {
 
 	public PruebaSobel() {
 		super("Prueba Sobel");
-		this.setSize(1000, 667);
+		this.setSize(1920, 1080);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.show();
 		try {
-			BufferedImage img_in = ImageIO.read (new File("ej_4/imagen_prueba.jpg"));
+			BufferedImage img_in = ImageIO.read (new File("ej_4/imagen_prueba2.jpg"));
 			this.setImg(img_in);
 			Date antes = new Date();
 			WorkerSobel worker = new WorkerSobel();
