@@ -1,17 +1,15 @@
-package ej4;
+package ej_4;
+
+import java.awt.image.BufferedImage;
 
 public class PedazoImagen {
 	private int originalWidth, originalHeight;
 	private int offsetX, offsetY;
 	private int width, height;
-	BufferedImage buffer;
+	private BufferedImage buffer;
 
-	public PedazoImagen (
-		originalWidth, originalHeight, 
-		offsetX, offsetY,
-		width, height,
-		imageType
-	) {
+	public PedazoImagen (int originalWidth,int originalHeight, int offsetX,int offsetY, int
+		width,int height,int imageType) {
 		this.originalWidth = originalWidth;
 		this.originalHeight = originalHeight;
 		this.offsetX = offsetX;
@@ -21,31 +19,70 @@ public class PedazoImagen {
 		buffer = new BufferedImage(width, height, imageType);
 	}
 
-	public getOriginalWidth () {
-		return this.originalWidth;
+	public PedazoImagen(int originalWidth, int originalHeight, double offsetX, double offsetY, double width,
+			double height, int imageType) {
+		this.originalWidth = originalWidth;
+		this.originalHeight = originalHeight;
+		this.offsetX =(int) offsetX;
+		this.offsetY =(int) offsetY;
+		this.width =(int) width;
+		this.height =(int) height;
+		buffer = new BufferedImage((int)width,(int) height, imageType);
 	}
 
-	public getOriginalHeight () {
-		return this.originalHeight;
+	public int getOriginalWidth() {
+		return originalWidth;
 	}
 
-	public getOffsetX() {
-		return this.offsetX;
+	public void setOriginalWidth(int originalWidth) {
+		this.originalWidth = originalWidth;
 	}
 
-	public getOffsetY() {
-		return this.offsetY;
+	public int getOriginalHeight() {
+		return originalHeight;
 	}
 
-	public getWidth() {
-		return this.width;
+	public void setOriginalHeight(int originalHeight) {
+		this.originalHeight = originalHeight;
 	}
 
-	public getHeight() {
-		return this.height;
+	public int getOffsetX() {
+		return offsetX;
 	}
 
-	public getBufferedImage() {
-		return this.buffer;
+	public void setOffsetX(int offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public int getOffsetY() {
+		return offsetY;
+	}
+
+	public void setOffsetY(int offsetY) {
+		this.offsetY = offsetY;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public BufferedImage getBuffer() {
+		return buffer;
+	}
+
+	public void setBuffer(BufferedImage buffer) {
+		this.buffer = buffer;
 	}
 }
